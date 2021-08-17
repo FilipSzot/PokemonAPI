@@ -13,7 +13,8 @@ const httpTrigger: AzureFunction = async (ctx: Context, req: HttpRequest): Promi
 
     const functionService: IFunctionService<any> =
         container.get<IFunctionService<any>>(COMMON_TYPES.IFunctionService);
-    const response: any = await functionService.processMessageAsync(req.body);
+    // const response: any = await functionService.processMessageAsync(req.body);
+    const response: any = await functionService.getPokemons(req.query);
     ctx.res = {
         body: response,
         status: 200,

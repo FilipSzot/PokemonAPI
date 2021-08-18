@@ -2,65 +2,86 @@ import { injectable } from "inversify";
 import axios from "axios";
 import { Pokemon } from "./pokemon";
 import _ from "lodash";
+import { PokemonResponse } from "./PokemonResponse";
+import { PokemonResponseService } from "./PokemonResponseService";
 
 @injectable()
 export class PokemonService {
-    public static async loadPokemons(params: any): Promise<Pokemon[]> {
+    public static async loadPokemons(params: any): Promise<any> {
         const promises: any[] = [];
         for ( const key in params ) {
             if ( key !== "id" ) {
                 promises.push(this.getPokemonsByParams(key, params[key]));
-            } else if ( key === "id" ) {
-                const ids: string = params[key];
-                ids.split(",").forEach((element) => {
-                    promises.push(this.getPokemonById(element));
-                });
+            } else if ( key === "id" || key === "name" ) {
+                const indexes: string = params[key];
+                promises.push(this.getPokemonsByIndexesOrNames(indexes.split(",")));
             }
         }
         return Promise.all(promises).then( (res) => {
-            return this.intersectionElements(res);
+            console.log(res);
+            return PokemonResponseService.intersectionResponses(res);
         });
     }
     
-    public static async getPokemonsByParams(param: string, value: string): Promise<Pokemon[]> {
-        let response: any[] = [];
+    public static async getPokemonsByParams(param: string, value: string): Promise<PokemonResponse> {
         const url: string = `https://pokeapi.co/api/v2/${param}/${value}`;
+        let status: number;
+        let response: PokemonResponse;
+        let pokemons: Pokemon[] = [];
         try {
             const data: any = await axios.get(url);
+            status = data.status;
+            response = new PokemonResponse(status);
             if (data.hasOwnProperty("data") && data.data.hasOwnProperty("pokemon")) {
-                response = data.data.pokemon;
+                pokemons = data.data.pokemon.map(
+                    (obj) => {
+                        if ( obj.hasOwnProperty("pokemon")) {
+                            return new Pokemon(obj.pokemon.url, obj.pokemon.name);
+                        }
+                });
             }
-            return response.map(
-                (obj) => {
-                    if ( obj.hasOwnProperty("pokemon")) {
-                        return new Pokemon(obj.pokemon.url, obj.pokemon.name);
-                    }
-            });
-
+            if(pokemons.length > 0) {
+                console.log(pokemons);
+                response.injectPokemons(pokemons);
+            }
+            console.log(response);
         } catch (error) {
-            console.log(error.response.data.error);
+            status = error.response.status;
+            response = new PokemonResponse(status);
         }
+        return response;
     }
 
-    public static async getPokemonById(id: string): Promise<Pokemon> {
-        let response: Pokemon;
-        const url: string = `https://pokeapi.co/api/v2/pokemon/${id}`;
+    public static async getPokemonsByIndexesOrNames(array: string[]): Promise<PokemonResponse> {
+        const promises: any[] = [];
+        array.forEach((element) => {
+            promises.push(this.getPokemon(element));
+        });
+        return Promise.all(promises).then( (res) => {
+            return PokemonResponseService.unionResponses(res);
+        });
+    }
+
+    public static async getPokemon(indexOrName: string): Promise<PokemonResponse> {
+        const url: string = `https://pokeapi.co/api/v2/pokemon/${indexOrName}`;
+        let status: number;
+        let response: PokemonResponse
         try {
             const data: any = await axios.get(url);
-            if (data.hasOwnProperty("data")) {
-                response = data.data;
-                if (response.hasOwnProperty("name")) {
-                    return new Pokemon(url, response.name);
-                } else {
-                    return null;
-                }
+            status = data.status;
+            response = new PokemonResponse(status);
+            if (data.hasOwnProperty("data") && data.data.hasOwnProperty("name")) {
+                const pokemon: {name: string} = data.data;
+                response.injectPokemons([new Pokemon(url, pokemon.name)]);
             }
         } catch (error) {
-            console.log(error.response.data.error);
+            status = error.response.status;
+            response = new PokemonResponse(status);
         }
+        return response;
     }
 
-    private static intersectionElements(array: any[]): Pokemon[] {
+    public static intersectionElements(array: any[]): Pokemon[] {
         let result: Pokemon[] = [];
         const elementsById: Pokemon[] = [];
         array.forEach( (element) => {

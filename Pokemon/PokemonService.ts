@@ -1,32 +1,46 @@
-import { injectable } from "inversify";
+import { Container, injectable } from "inversify";
 import axios from "axios";
 import { Pokemon } from "./pokemon";
 import _ from "lodash";
 import { PokemonResponse } from "./PokemonResponse";
-import { PokemonResponseService } from "./PokemonResponseService";
+import getContainer from "../ioc/inversify.config";
+import { IPokemonResponseService } from "./IPokemonResponseService";
+import { COMMON_TYPES } from "../ioc/commonTypes";
 
 @injectable()
 export class PokemonService {
-    private static POKEMON_API_URL: string = "https://pokeapi.co/api/v2/";
-    public static async loadPokemons(params: any): Promise<any> {
-        const promises: any[] = [];
-        for ( const key in params ) {
-            const properties: string[] = params[key].split(",");
-            if ( key !== "id" ) {
-                _.forEach(properties, (prop) => {
-                    promises.push(this.getPokemonsByParams(key, prop));
-                });
-            } else if ( key === "id" || key === "name" ) {
-                promises.push(this.getPokemonsByIndexesOrNames(properties));
-            }
+    private readonly _POKEMON_API_URL: string = "https://pokeapi.co/api/v2/";
+    
+    private readonly _container: Container = getContainer();
+    private readonly _pokemonResponseService: IPokemonResponseService<any> =
+    this._container.get<IPokemonResponseService<any>>(COMMON_TYPES.IPokemonResponseService);
+    
+    public async loadPokemons(params: {}): Promise<PokemonResponse> {
+        
+        try {
+            const promises: any[] = [];
+            for ( const key in params ) {
+                if ( key !== "id" ) {
+                    _.forEach(params[key].split(","), (prop) => {
+                        promises.push(this.getPokemonsByParams(key, prop));
+                    });
+                } else if ( key === "id" || key === "name" ) {
+                    promises.push(this.getPokemonsByIndexesOrNames(params[key].split(",")));
+                }
+
         }
-        return Promise.all(promises).then( (res) => {
-            return PokemonResponseService.intersectionResponses(res);
-        });
+            return Promise.all(promises).then( (res) => {
+                return this._pokemonResponseService.intersectionResponses(res);
+            });
+
+        } catch (error) {
+            const status: number = error.response.status;
+            return new PokemonResponse(status);
+        }
     }
     
-    public static async getPokemonsByParams(param: string, value: string): Promise<PokemonResponse> {
-        const url: string = `${this.POKEMON_API_URL}${param}/${value}`;
+    public async getPokemonsByParams(param: string, value: string): Promise<PokemonResponse> {
+        const url: string = `${this._POKEMON_API_URL}${param}/${value}`;
         let status: number;
         let response: PokemonResponse;
         let pokemons: Pokemon[] = [];
@@ -52,19 +66,19 @@ export class PokemonService {
         return response;
     }
 
-    public static async getPokemonsByIndexesOrNames(array: string[]): Promise<PokemonResponse> {
+    public async getPokemonsByIndexesOrNames(array: string[]): Promise<PokemonResponse> {
         const promises: any[] = [];
         array.forEach((element) => {
             promises.push(this.getPokemon(element));
         });
         
         return Promise.all(promises).then( (res) => {
-            return PokemonResponseService.unionResponses(res);
+            return this._pokemonResponseService.unionResponses(res);
         });
     }
 
-    public static async getPokemon(indexOrName: string): Promise<PokemonResponse> {
-        const url: string = `${this.POKEMON_API_URL}pokemon/${indexOrName}`;
+    public async getPokemon(indexOrName: string): Promise<PokemonResponse> {
+        const url: string = `${this._POKEMON_API_URL}pokemon/${indexOrName}`;
         let status: number;
         let response: PokemonResponse;
         try {
@@ -82,7 +96,7 @@ export class PokemonService {
         return response;
     }
 
-    public static intersectionElements(array: any[]): Pokemon[] {
+    public intersectionElements(array: any[]): Pokemon[] {
         let result: Pokemon[] = [];
         const elementsById: Pokemon[] = [];
         array.forEach( (element) => {

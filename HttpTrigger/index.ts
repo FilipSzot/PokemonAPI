@@ -6,6 +6,7 @@ import { ILogger } from "../commonServices/iLogger";
 import { IFunctionService } from "./services/IFunctionService";
 import { Container } from "inversify";
 
+
 const httpTrigger: AzureFunction = async (ctx: Context, req: HttpRequest): Promise<any> => {
     const container: Container = getContainer();
     const logger: Logger = container.get<ILogger>(COMMON_TYPES.ILogger) as Logger;
@@ -16,8 +17,8 @@ const httpTrigger: AzureFunction = async (ctx: Context, req: HttpRequest): Promi
     // const response: any = await functionService.processMessageAsync(req.body);
     const response: any = await functionService.getPokemons(req.query);
     ctx.res = {
-        body: response,
-        status: 200,
+        body: response.body,
+        status: response.status,
         headers: { "Content-Type": "application/json" },
     };
     return ctx.res;

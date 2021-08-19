@@ -10,7 +10,7 @@ export class PokemonResponse {
         this.status = status;
         this.body = {};
     }
-    public injectPokemons(pokemons: Pokemon[]){
+    public injectPokemons(pokemons: Pokemon[]): void {
         this.body.pokemons = pokemons;
     }
 }

@@ -7,24 +7,26 @@ import { PokemonResponseService } from "./PokemonResponseService";
 
 @injectable()
 export class PokemonService {
+    private static POKEMON_API_URL: string = "https://pokeapi.co/api/v2/";
     public static async loadPokemons(params: any): Promise<any> {
         const promises: any[] = [];
         for ( const key in params ) {
+            const properties: string[] = params[key].split(",");
             if ( key !== "id" ) {
-                promises.push(this.getPokemonsByParams(key, params[key]));
+                _.forEach(properties, (prop) => {
+                    promises.push(this.getPokemonsByParams(key, prop));
+                });
             } else if ( key === "id" || key === "name" ) {
-                const indexes: string = params[key];
-                promises.push(this.getPokemonsByIndexesOrNames(indexes.split(",")));
+                promises.push(this.getPokemonsByIndexesOrNames(properties));
             }
         }
         return Promise.all(promises).then( (res) => {
-            console.log(res);
             return PokemonResponseService.intersectionResponses(res);
         });
     }
     
     public static async getPokemonsByParams(param: string, value: string): Promise<PokemonResponse> {
-        const url: string = `https://pokeapi.co/api/v2/${param}/${value}`;
+        const url: string = `${this.POKEMON_API_URL}${param}/${value}`;
         let status: number;
         let response: PokemonResponse;
         let pokemons: Pokemon[] = [];
@@ -40,11 +42,9 @@ export class PokemonService {
                         }
                 });
             }
-            if(pokemons.length > 0) {
-                console.log(pokemons);
+            if (pokemons.length > 0) {
                 response.injectPokemons(pokemons);
             }
-            console.log(response);
         } catch (error) {
             status = error.response.status;
             response = new PokemonResponse(status);
@@ -57,15 +57,16 @@ export class PokemonService {
         array.forEach((element) => {
             promises.push(this.getPokemon(element));
         });
+        
         return Promise.all(promises).then( (res) => {
             return PokemonResponseService.unionResponses(res);
         });
     }
 
     public static async getPokemon(indexOrName: string): Promise<PokemonResponse> {
-        const url: string = `https://pokeapi.co/api/v2/pokemon/${indexOrName}`;
+        const url: string = `${this.POKEMON_API_URL}pokemon/${indexOrName}`;
         let status: number;
-        let response: PokemonResponse
+        let response: PokemonResponse;
         try {
             const data: any = await axios.get(url);
             status = data.status;

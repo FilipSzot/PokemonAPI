@@ -6,8 +6,6 @@ import { ILogger } from "../commonServices/iLogger";
 import { IFunctionService } from "./services/IFunctionService";
 import { Container } from "inversify";
 
-
-const POKEMON_API_URL = "https://pokeapi.co/api/v2/";
 const httpTrigger: AzureFunction = async (ctx: Context, req: HttpRequest): Promise<any> => {
     const container: Container = getContainer();
     const logger: Logger = container.get<ILogger>(COMMON_TYPES.ILogger) as Logger;

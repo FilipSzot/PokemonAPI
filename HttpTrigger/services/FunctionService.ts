@@ -22,9 +22,9 @@ export class FunctionService implements IFunctionService<any> {
     }
     public async getPokemons(query: {}): Promise<any> {        
         return this._pokemonService.loadPokemons(query).then( (res) => {
-            let response: {status: number, body:{pokemons?: string[]}} = {
+            const response: {status: number, body: { pokemons?: string[] } } = {
                 status: 200,
-                body: {}
+                body: {},
             };
             response.status = res.status;
 

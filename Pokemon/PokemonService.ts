@@ -34,7 +34,7 @@ export class PokemonService {
             });
 
         } catch (error) {
-            const status: number = error.response.status;
+            const status: number = (typeof error.response.status !== "undefined") ? error.response.status : 400;
             return new PokemonResponse(status);
         }
     }
@@ -60,7 +60,7 @@ export class PokemonService {
                 response.injectPokemons(pokemons);
             }
         } catch (error) {
-            status = error.response.status;
+            status = (typeof error.response.status === "undefined") ? 400 : error.response.status;
             response = new PokemonResponse(status);
         }
         return response;
@@ -90,7 +90,7 @@ export class PokemonService {
                 response.injectPokemons([new Pokemon(url, pokemon.name)]);
             }
         } catch (error) {
-            status = error.response.status;
+            status = (typeof error.response.status === "undefined") ? 400 : error.response.status;
             response = new PokemonResponse(status);
         }
         return response;

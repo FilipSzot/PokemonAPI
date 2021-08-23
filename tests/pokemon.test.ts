@@ -3,15 +3,11 @@ import { COMMON_TYPES } from "../ioc/commonTypes";
 import getContainer from "../ioc/inversify.config";
 import { IPokemonService } from "../Pokemon/IPokemonService";
 import { PokemonResponse } from "../Pokemon/PokemonResponse";
-import { assert, expect } from "chai";
-import httpTrigger from "../HttpTrigger";
-import chaiHttp from "chai-http";
-import chai from "chai";
+import { assert } from "chai";
 
 const container: Container = getContainer();
 const pokemonService: IPokemonService<any> =
 container.get<IPokemonService<any>>(COMMON_TYPES.IPokemonService);
-chai.use(chaiHttp);
 
 describe("loadPokemons", () => {
     it("has response 200", async () => {
@@ -59,16 +55,5 @@ describe("getPokemonsByParams", () => {
         await pokemonService.getPokemonsByParams("type", "grass").then((res) => {
             assert.typeOf(res, typeof new PokemonResponse(200));
         });
-    });
-});
-describe("httpTrigger", () => {
-    it("has response 200", () => {
-        chai
-            .request(httpTrigger)
-            .get("/api/HttpTrigger?id=1")
-            .end((err, res) => {
-                const response: {status: number} = res;
-                expect(res.status).to.equal(200);
-            });
     });
 });

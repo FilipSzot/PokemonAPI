@@ -6,14 +6,15 @@ import { PokemonResponse } from "./PokemonResponse";
 import getContainer from "../ioc/inversify.config";
 import { IPokemonResponseService } from "./IPokemonResponseService";
 import { COMMON_TYPES } from "../ioc/commonTypes";
+import { IPokemonService } from "./IPokemonService";
 
 @injectable()
-export class PokemonService {
+export class PokemonService implements IPokemonService {
     private readonly _POKEMON_API_URL: string = "https://pokeapi.co/api/v2/";
     
     private readonly _container: Container = getContainer();
-    private readonly _pokemonResponseService: IPokemonResponseService<any> =
-    this._container.get<IPokemonResponseService<any>>(COMMON_TYPES.IPokemonResponseService);
+    private readonly _pokemonResponseService: IPokemonResponseService =
+    this._container.get<IPokemonResponseService>(COMMON_TYPES.IPokemonResponseService);
     
     public async loadPokemons(params: {}): Promise<PokemonResponse> {
         
@@ -96,25 +97,4 @@ export class PokemonService {
         return response;
     }
 
-    public intersectionElements(array: any[]): Pokemon[] {
-        let result: Pokemon[] = [];
-        const elementsById: Pokemon[] = [];
-        array.forEach( (element) => {
-            if (element !== null) {
-                if (!Array.isArray(element)) {
-                    elementsById.push(element);
-                } else {
-                    if (result.length < 1) {
-                        result = _.union(result, element);
-                    } else {
-                        result = _.intersectionBy(result, element, "id");
-                    }
-                }
-            }
-        });
-        if (elementsById.length > 0) {
-            result = _.intersectionBy(result, elementsById, "id");
-        }
-        return result;
-    }
 }

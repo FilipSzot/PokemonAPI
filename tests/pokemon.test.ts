@@ -6,8 +6,8 @@ import { PokemonResponse } from "../Pokemon/PokemonResponse";
 import { assert } from "chai";
 
 const container: Container = getContainer();
-const pokemonService: IPokemonService<any> =
-container.get<IPokemonService<any>>(COMMON_TYPES.IPokemonService);
+const pokemonService: IPokemonService =
+container.get<IPokemonService>(COMMON_TYPES.IPokemonService);
 
 describe("loadPokemons", () => {
     it("has response 200", async () => {

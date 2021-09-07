@@ -24,11 +24,11 @@ const getContainer: (() => Container) = (): Container => {
         .to(FunctionService);
     
     container
-        .bind<IPokemonService<any>>(COMMON_TYPES.IPokemonService)
+        .bind<IPokemonService>(COMMON_TYPES.IPokemonService)
         .to(PokemonService);
    
     container
-        .bind<IPokemonResponseService<any>>(COMMON_TYPES.IPokemonResponseService)
+        .bind<IPokemonResponseService>(COMMON_TYPES.IPokemonResponseService)
         .to(PokemonResponseService);
 
     return container;

@@ -5,7 +5,7 @@ import _ from "lodash";
 import { IPokemonResponseService } from "./IPokemonResponseService";
 
 @injectable()
-export class PokemonResponseService implements IPokemonResponseService<any> {
+export class PokemonResponseService implements IPokemonResponseService {
     private readonly _SUCCESS_STATUS: number = 200;
     private readonly _INTERSECTION: string = "intersection";
     private readonly _UNION: string = "union";

@@ -12,8 +12,8 @@ export class FunctionService implements IFunctionService<any> {
     private readonly _logger: ILogger;
     
     private readonly _container: Container = getContainer();
-    private readonly _pokemonService: IPokemonService<any> =
-    this._container.get<IPokemonService<any>>(COMMON_TYPES.IPokemonService);
+    private readonly _pokemonService: IPokemonService =
+    this._container.get<IPokemonService>(COMMON_TYPES.IPokemonService);
 
     public async processMessageAsync(msg: any): Promise<any> {
         this._logger.info("Hello world");

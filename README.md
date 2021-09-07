@@ -1,5 +1,3 @@
-# HOTAILORS IOC RECRUITMENT TASK
-
 ## Requirements
 To start Azure function locally you will need:
 1. Azure CLI [(installation instructions)](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest)
@@ -18,9 +16,3 @@ Additional info:
   * Example invoke: ``localhost:7071/api/HttpTrigger?id=1&id=2&id=5&type=grass``
   * Example response: 
         ``{ status: 200, body: { pokemons: ["bulbasaur", "ivysaur"] } }``
-
-Please do not use any external packages dedicated to handle pokeapi.
-
-In case of any questions send email to: <lukasz@hotailors.com>
-
-Good luck :slightly_smiling_face:
